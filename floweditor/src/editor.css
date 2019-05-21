@@ -1,0 +1,134 @@
+body{
+  background:#fff;
+  color: #333;
+  font-size: 9pt;
+  font-family:sans-serif,verdana,arial;
+}
+
+#_canvasMain {
+  cursor: crosshair;
+  border:1px solid gray;
+}
+
+#_canvasMain:active {
+  cursor: move;
+}
+
+#header{
+  width:980px;
+  margin-right: auto;
+  margin-left: auto; 
+  padding: 0px;
+  background: #fff;
+  height:128px;
+  text-align:left;
+}
+
+#contain{
+  margin-right: auto;
+  margin-left: auto;
+  width: 980px;
+}
+
+#mainbg{
+  width:980px;
+  padding: 0px;
+  background: #fff;
+  float: left;
+}
+
+#right{
+  float: right; 
+  margin: 2px 0px 2px 0px;
+  padding:0px; 
+  width: 759px;
+  height: 519px;
+  background: #ccd2de;
+  text-align:left;
+}
+
+#left{
+  float: left; 
+  margin: 2px 2px 0px 3px; 
+  padding: 0px; 
+  background: #fff;
+  width: 210px;
+  height: 519px;
+  text-align:left;
+  border:1px solid black;
+  position:relative;
+  overflow:scroll;
+}
+
+#footer{
+  clear:both;
+  width:980px;
+  margin-right: auto;
+  margin-left: auto; 
+  padding: 0px;
+  background: #fff;
+  height:30px;
+}
+
+.button.gray{
+  padding: 4px 0px 0px 0px;
+  display:inline-block;
+  color: #000; 
+  cursor: pointer;
+  font-weight: normal;
+  border-radius: 3px;
+  text-align:center;
+  text-shadow: 0px 0px #666;
+  height:24px;
+  width:80px;
+  border: #000 1px solid;
+  background-color: #ececef;
+  text-decoration:none;
+}
+.button.gray:hover{
+  cursor: pointer;
+  border: #005194 1px solid;            
+  color: #005194;
+  background-color: #e4f1f9;
+}
+.button.gray:active {  
+  background-position: 0 top;  
+  position: relative;  
+  top: 1px;
+  left: 1px;
+}
+
+*[draggable=true] {
+  cursor: move;
+}
+
+ul {
+  margin:0px;
+  margin-left: -40px;
+  width: 220px;
+  min-height: 300px;
+  list-style: none;
+}
+li{
+  width: 150px;
+  list-style: none;
+}
+li a {
+  text-decoration: none;
+  color: #00f;
+  margin: 10px;
+  width: 150px;
+  border: 1px solid #999;
+  background: #eee;
+  padding: 10px;
+  display: block;
+  font-size:8pt;
+}
+
+li a:hover:after {
+}
+
+li.over {
+  border-color: #333;
+  background: #ccc;
+}

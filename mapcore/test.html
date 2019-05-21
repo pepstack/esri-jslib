@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ESRI HTML5 Map Test</title>
+  
+  <script src="dist/esri.map.js"></script>
+  <style type="text/css">
+    #_canvasMain {
+      cursor: default;
+      border:1px solid black;
+    }
+    #_canvasMain: active {
+      cursor: move;
+    }
+  </style>
+</head>
+<body>
+  <div id="header" style="position: absolute; top: 10px; left: 10px; width: 500px; height: 40px">
+    <input type="button" id="_exportMapImage" value="Export Canvas Image">
+    <input type="button" id="_zoomIn" value="zoomIn">
+    <input type="button" id="_zoomOut" value="zoomOut">
+    <input type="button" id="_refresh" value="Refresh">
+    <input size="4" id="_pos_x" value="0">
+    <input size="4" id="_pos_y" value="0">		
+  </div>
+  <div id="container" style="position: absolute; top: 50px; left: 10px; width: 500px; height: 300px">
+    <canvas id="_canvasMain" width="500" height="400">
+      This browser does not support HTML5 Canvas.
+    </canvas>
+  </div>
+  <script type="text/javascript">
+    var mapCanvas = new esri2.Map("_canvasMain");
+	alert(mapCanvas);
+  </script>
+</body>
+</html>

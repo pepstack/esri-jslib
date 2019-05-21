@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>editor by Liang_Zhang@esri.com</title>
+  <link href="./style/editor.css" rel="stylesheet" type="text/css" />
+  <script src="./script/jquery-1.7.1.min.js"></script>
+  <!--
+  <link href="./style/jquery-ui/ui-lightness/jquery-ui-1.8.17.custom.css" rel="stylesheet" type="text/css" />
+  <script src="./script/jquery-ui-1.8.17.custom.min.js"></script>
+  -->
+  <link href="./style/jquery-ui/cupertino/jquery-ui-1.8.18.custom.css" rel="stylesheet" type="text/css" />
+  <script src="./script/jquery-ui-1.8.18.custom.min.js"></script>
+
+  <script src="./script/esri2.utility.js"></script>
+  <script src="./script/floweditor.js"></script>
+  <style type="text/css">
+  </style>
+</head>
+<body>
+  <!-- node-dialog: filled on server -->
+  <div id="dialog" title="" style="display:none"></div>
+  <div id="header">
+    <p>
+      <input id="_refresh" type="button" class="button gray" value="refresh" onclick="refreshEditor();" />
+      <input id="_resize" type="button" class="button gray" value="resize" onclick="resizeEditor();" />
+      <input id="_clear" type="button" class="button gray" value="clear" onclick="removeAll();" />
+      <input id="_export" type="button" class="button gray" value="export" onclick="exportJSON();" />
+      <input id="_import" type="button" class="button gray" value="import" onclick="importJSON();" />
+      <input id="_update" type="button" class="button gray" value="update" onclick="updateNode();" />
+      <input id="_readOnly" type="button" class="button gray" value="readOnly" onclick="setReadOnly();" />
+      <input type="radio" name="nodeSizeGrp" value="S" onclick="setNodeSize('S');">small
+      <input type="radio" name="nodeSizeGrp" value="M" onclick="setNodeSize('M');" checked>medium
+      <input type="radio" name="nodeSizeGrp" value="L" onclick="setNodeSize('L');">large
+    </p>
+    <p><textarea id="jsonFlowChart" style="width:800px;height:80px"></textarea></p>
+  </div>
+  <div id="contain">
+    <div id="mainbg">
+      <div id="right">
+        <canvas id="_canvasMain" width="300" height="100">
+          This browser does not support HTML5 Canvas.
+        </canvas>
+      </div>
+      <div id="left">
+        <ul id="nodelist"></ul>
+      </div>
+    </div>
+  </div>
+  <div id="footer">
+  </div>
+  <script>
+    var dlgParam = new GeoFlowEditor.NodeDialogParam('dialog');
+
+    var flowEditor = new GeoFlowEditor("_canvasMain", "right", function (thisNode) {
+      if (flowEditor.initNodeDialog(dlgParam, thisNode)) {
+        dlgParam.updateDlg();
+        dlgParam.showDlg();
+      }
+    });
+
+    flowEditor.setOnAfterLoad( function (ul) { // do this function after page loaded
+        flowEditor.enableWidget("esri_logo", true);
+        flowEditor.enableWidget("status_legend", true);
+
+        flowEditor.createNodeList(ul);
+        // flowEditor.importJSON(json);
+      },
+      __get_elem("nodelist")
+    );
+
+    function clearJsonFlowChart() {
+      __get_elem("jsonFlowChart").value = "";      
+    }
+
+    function setReadOnly() {
+      flowEditor.readOnly = !flowEditor.readOnly;
+      __get_elem("jsonFlowChart").value = "flowEditor.readOnly = "+flowEditor.readOnly;
+      flowEditor.refresh();
+    }
+
+    function removeAll() {
+      flowEditor.removeAll();
+    }
+
+    function resizeEditor() {
+      flowEditor.resizeCanvas(300, 200);
+    }
+
+    function refreshEditor() {
+      clearJsonFlowChart();
+      flowEditor.refresh();
+    }
+
+    function exportJSON() {
+      clearJsonFlowChart();
+      var jsonString = flowEditor.exportJSON();
+      __get_elem("jsonFlowChart").value = jsonString; // display flow json string
+      
+      try {
+        flowEditor.validateFlow();
+        // do with jsonString...
+        alert("validateFlow ok");
+      }
+      catch(e) {
+        alert(e.message);
+      }
+    }
+
+    function importJSON() {
+      try {
+        var jsonString = __get_elem("jsonFlowChart").value;
+        flowEditor.importJSON(JSON.parse(jsonString));
+      }
+      catch (e) {
+        alert(e);
+      }
+    }
+
+    // sample: update node state
+    function updateNode() {
+      // execStatus: initialized, failed, succeeded, running, paused
+      var flowStateJSON = {
+        "JobId": {
+          "1":{
+            "execStatus":"succeeded",
+            "errMessage":"succeeded"
+          },
+          "2":{
+            "execStatus":"failed",
+            "errMessage":"Undefinded URL"
+          },
+          "3":{
+            "execStatus":"initialized",
+            "errMessage":"initialized"
+          },
+          "4":{
+            "execStatus":"running",
+            "errMessage":"running"
+          },
+          "5":{
+            "execStatus":"paused",
+            "errMessage":"paused"
+          }
+        }
+      };
+
+      // display node states string
+      var jsonString = JSON.stringify(flowStateJSON);
+      __get_elem("jsonFlowChart").value = jsonString;
+
+      // update node states
+      flowEditor.updateNode(null, flowStateJSON); //??UPD
+    }
+
+    clearJsonFlowChart();
+
+    //////////////////////////////////////////////
+    // place your code after this line:
+    function setNodeSize(val) {
+	  if (val==='S') {
+		esri2.GeoFlow.NodeTypes.GridSize = 16;
+	  }
+	  else if (val==='M') {
+		esri2.GeoFlow.NodeTypes.GridSize = 24;
+	  }
+	  else if (val==='L') {
+		esri2.GeoFlow.NodeTypes.GridSize = 32;
+	  }
+
+	  var jsonString = flowEditor.exportJSON(false);
+	  flowEditor.importJSON(JSON.parse(jsonString));
+	  flowEditor.refresh();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>mapctl.html</title>
+  <link rel="styleSheet" type="text/css" href="style/mapctl.css"/>
+  <script src="script/utils.js"></script>
+  <script src="script/esri2.mapctl.js"></script>
+  <script src="script/jquery-1.7.1.min.js"></script>
+  <script>
+    // demo arcgis online map service urls
+    var mapUrls = [
+      "http://server.arcgisonline.com/ArcGIS/rest/services/ESRI_StreetMap_World_2D/MapServer",
+      "http://services.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer"
+    ];
+  </script>
+</head>
+<body>
+  <div id="header">
+    <input type="input" id="_pos_x" size="2" value="0">
+    <input type="input" id="_pos_y" size="2" value="0">
+    <input type="input" id="_map_x" size="6" value="0">
+    <input type="input" id="_map_y" size="6" value="0">
+  </div>
+  <div id="contain">
+    <div id="mainbg">
+      <div id="right">
+        <canvas id="_canvasMain" width="300" height="100">
+          This browser does not support HTML5 Canvas.
+        </canvas>
+      </div>
+      <div id="left">
+         <li style="list-style:none"><a href="api.html" target="_blank">MapCtl API Reference</a></li>
+        <li style="list-style:none">&raquo;View Map</li>
+        <li><a id="_exportMap" href="#" onclick="exportMap();">Export Map</a></li>
+        <li><a id="_centerAt" href="#" onclick="centerAt();" title="click to center to the last drawn point">CenterAt</a></li>
+        <li><a id="_zoomAll" href="#" onclick="zoomAll();">ZoomAll</a></li>
+        <li><a id="_zoomBox" href="#" onclick="setOpState('opZoomBox');">ZoomBox</a></li>
+        <li><a id="_refresh" href="#" onclick="refresh();">Refresh</a></li>
+        <li style="list-style:none">&raquo;Edit Map</li>
+        <li><a id="_drawPoint" href="#" onclick="setOpState('opDrawPoint');">Draw Point</a></li>
+        <li><a id="_drawRect" href="#" onclick="setOpState('opDrawRect');">Draw Rect</a></li>
+        <li><a id="_drawLine" href="#" onclick="setOpState('opDrawLine');">Draw Line</a></li>
+        <li><a id="_drawPolygon" href="#" onclick="setOpState('opDrawPolygon');">Draw Polygon</a></li>
+      </div>
+    </div>
+  </div>
+  <div id="footer">
+    Esri Beijing
+  </div>
+  <script>
+    function exportMap() {
+      __log("exportMap");
+      mapCtl.getMapCanvas().exportMap(window);
+    }
+    function centerAt() {
+      __log("centerAt");
+      var mapCanvas = mapCtl.getMapCanvas();
+      var pt = mapCanvas.getAttribute("lastpoint"); // this is workaround method
+      if (__not_null(pt)) {
+        mapCanvas.centerAt(pt.x, pt.y);
+        mapCanvas.refresh(true);
+      }
+    }
+
+    function zoomAll() {
+      __log("zoomAll");
+    }
+
+    function refresh() {
+      __log("refresh");
+      mapCtl.getMapCanvas().opState = "opNone";
+      mapCtl.getMapCanvas().refresh(true);
+    }
+
+    function setOpState(op) {
+      mapCtl.getMapCanvas().opState = op;
+    }
+
+    // Only for FireFox
+    __add_event(window, 'DOMMouseScroll',
+      function (e) {
+        mapCtl.onMouseWheel(e);
+      }
+    );
+
+    function loadMap (mapCtl) {
+      if (__is_null(mapCtl.imagesLib)) {
+        // pre-load all images
+        mapCtl.imagesLib = new esri2.Common.ImageLoader(
+          function (imgState){
+            if (imgState.loader.allReady()){
+              loadMap(mapCtl);
+            }
+          },
+          null
+        );
+        mapCtl.imagesLib.addImage("$point", "./img/pin_green.png");
+        mapCtl.imagesLib.loadAll();
+        return;
+      }
+
+      var mapCanvas = mapCtl.getMapCanvas();
+
+      // add layer 0 for drawing features:
+      //
+      var featureLayer = mapCanvas.addLayer("drawings");
+      featureLayer.render.strokeStyle="#1af";
+      featureLayer.render.lineWidth=3;
+      featureLayer.render.fillStyle="#cba";
+
+      // how to use symbol to draw point
+      var pointSymbol = new esri2.Map.Symbol("$point"); // name = "$point"
+      pointSymbol.symbolUnit.baseX = 11;
+      pointSymbol.symbolUnit.baseY = 23;
+      var shape = pointSymbol.addShape(); // use shape to draw symbol
+      shape.createRectXY(0, 0, 32, 32);
+      shape.renderName = "#";
+      var render = shape.addRender(shape.renderName); // use render to draw shape
+      render.strokeStyle = null;
+      render.fillStyle = null;
+      render.fillImage = mapCtl.imagesLib.getImage(pointSymbol.name);
+      pointSymbol.updateBound();
+      mapCanvas.addAttribute(pointSymbol.name, pointSymbol); // save symbol
+
+      // tell which layer we store drawing features
+      mapCanvas.addAttribute("opDrawRect"+"Layer", featureLayer);
+      mapCanvas.addAttribute("opDrawPoint"+"Layer", featureLayer);
+      mapCanvas.addAttribute("opDrawLine"+"Layer", featureLayer);
+      mapCanvas.addAttribute("opDrawPolygon"+"Layer", featureLayer);
+
+      // set layer render
+      mapCanvas.trackingLayer.render.lineWidth=1;
+      mapCanvas.trackingLayer.render.fillStyle="#abc";
+
+      // add layers 1 for base map:
+      //
+      // send ajax request for load arcgis online map
+      // the only place we use jQuery
+      // http://server.arcgisonline.com/ArcGIS/rest/services/ESRI_StreetMap_World_2D/MapServer?f=json&pretty=true
+      $.ajax({
+        url: mapUrls[0],
+        dataType: 'jsonp', // cross domain using: jsonp
+        data: {f:"json", pretty:"true"},
+        success: function(data){
+          var mapSrv = new MapCtl.AgisMapService(mapUrls[0], data);
+          mapCtl.addMapService(mapSrv);
+        },
+        error: function(data){
+          alert("loadMap() failed");
+        }
+      });
+    }
+
+    var mapCtl = new MapCtl("_canvasMain", "right");
+    mapCtl.setOnAfterLoad(loadMap, mapCtl);
+  </script>
+</body>
+</html>

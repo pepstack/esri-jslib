@@ -1,0 +1,41 @@
+﻿<!doctype html>
+<html>
+<head>
+  <script src="./script/jquery-1.7.1.min.js"></script>
+  <script>
+    var imgURL = "http://static.googleadsserving.cn/pagead/imgad?id=CICAgIDQvZv5zwEQeBjYBDIIKo1NGD-LQP8";
+    function getImageData() {
+      var ifrm = window.frames["ifr"];
+      ifrm.onload = function() {
+        alert("----------1");
+        alert(window.frames["ifr"].document);
+        alert("----------2");
+      };
+      ifrm.src = "http://www.5a5e.com/";
+
+      var vcodeTD = document.getElementById("verifycodepic");
+      url= document.defaultView.getComputedStyle(vcodeTD, null).getPropertyValue('background-image');
+      // alert(url);
+      //var imgObj = document.getElementById("imgVCode");
+      //imgObj.src = "http://static.googleadsserving.cn/pagead/imgad?id=CICAgIDQvZv5zwEQeBjYBDIIKo1NGD-LQP8";
+    }
+    function getImageDataAfter () {
+      var imgObj = document.getElementById("imgVCode");
+      alert(imgObj.src);
+    }
+  </script>
+</head>
+<body>
+  <input id="btnGetImg" type="button" value="getImageData" onclick="getImageData();" />
+  <input id="btnGetImg2" type="button" value="getImageDataAfter" onclick="getImageDataAfter();" />
+  <table>
+    <tr>
+      <td>请输入验证码</td>
+      <td id="verifycodepic" background="http://static.googleadsserving.cn/pagead/imgad?id=CICAgIDQvZv5zwEQeBjYBDIIKo1NGD-LQP8">...</td>
+      <td><img id="imgVCode"></td>
+    </tr>
+  </table>
+  <iframe id="ifr">
+  </iframe>
+</body>
+</html>
